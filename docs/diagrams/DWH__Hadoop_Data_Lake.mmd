@@ -1,0 +1,68 @@
+graph TD
+    subgraph Source_Systems [Data Sources]
+        CRM[CRM Systems]
+        ERP[ERP Systems]
+        LOG[Web Logs / API]
+    end
+
+    subgraph Ingestion_Layer [Ingestion & Landing]
+        Airflow[Apache Airflow - Orchestration]
+        Scoop[Apache Sqoop]
+        Spark[PySpark Streaming]
+    end
+
+    subgraph Data_Lake [Hadoop On-Premise - Data Lake]
+        HDFS_Raw[HDFS: Raw Zone]
+        HDFS_Stage[HDFS: Staging Zone]
+        Hive[Apache Hive / Impala]
+    end
+
+    subgraph Transformation_Layer [Modern DWH Layer]
+        TD_Landing[Teradata: Landing Table]
+        
+        subgraph DBT_Process [DBT Transformation Engine]
+            DBT_Models[DBT Models]
+            DBT_Macros[DBT Macros]
+            DBT_Tests[DBT Data Quality Tests]
+        end
+
+        TD_Core[Teradata: Integration Layer - 3NF]
+        TD_Mart[Teradata: Semantic Layer - Star Schema]
+    end
+
+    subgraph Quality_Governance [Data Quality & Governance]
+        GE[Great Expectations / DBT Expectations]
+        Catalog[Apache Atlas / Data Catalog]
+    end
+
+    subgraph Consumption_Layer [Analytics & BI]
+        PBI_Gateway[Power BI Gateway]
+        PBI_Service[Power BI Service / Reporting]
+    end
+
+    %% Process Connections
+    CRM & ERP --> Scoop
+    LOG --> Spark
+    Scoop & Spark -.-> Airflow
+    Scoop --> HDFS_Raw
+    Spark --> HDFS_Raw
+    
+    HDFS_Raw --> HDFS_Stage
+    HDFS_Stage -->|TPT Load| TD_Landing
+    
+    TD_Landing --> DBT_Process
+    DBT_Process --> TD_Core
+    TD_Core --> DBT_Process
+    DBT_Process --> TD_Mart
+    
+    DBT_Tests -.-> |Validation| GE
+    TD_Mart --> PBI_Gateway
+    PBI_Gateway --> PBI_Service
+
+    %% Styling
+    style DBT_Process fill:#ff694b,stroke:#333,stroke-width:2px,color:#fff
+    style TD_Core fill:#f9f,stroke:#333,stroke-width:2px
+    style TD_Mart fill:#f9f,stroke:#333,stroke-width:2px
+    style PBI_Service fill:#f2c811,stroke:#333,stroke-width:2px
+    style HDFS_Raw fill:#66ccff,stroke:#333,stroke-width:2px
+    style Airflow fill:#017cee,stroke:#333,stroke-width:2px,color:#fff
