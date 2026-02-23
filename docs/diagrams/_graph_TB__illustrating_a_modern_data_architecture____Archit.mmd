@@ -1,0 +1,105 @@
+graph LR
+    accTitle: Optimized Data Mesh Architecture
+    accDescr: A comprehensive visualization of Data Mesh pillars, highlighting the interplay between infrastructure, governance, and decentralized domains.
+
+    %% Global Styling & Class Definitions
+    classDef platformNode fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef domainNode fill:#f0f9ff,stroke:#0369a1,stroke-width:2px,color:#075985
+    classDef productNode fill:#ffffff,stroke:#2563eb,stroke-width:3px,font-weight:bold,color:#1e40af
+    classDef teamNode fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5,color:#334155
+    classDef govNode fill:#fff1f2,stroke:#e11d48,stroke-width:2px,color:#9f1239
+    classDef principleNode fill:#fef2f2,stroke:#991b1b,stroke-width:1px,font-style:italic,font-size:12px
+    classDef intelligenceNode fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#065f46
+
+    %% --- Pillar 4: Federated Computational Governance ---
+    subgraph GOV_P ["fa:fa-shield-halved Federated Computational Governance"]
+        direction TB
+        GOV[["fa:fa-gavel Governance Group<br/>(Cross-Domain Reps)"]]
+        POLICIES{{"fa:fa-code Global Policies<br/>(Machine-Readable)"}}
+        GOV --> POLICIES
+    end
+
+    %% --- Pillar 3: The Self-Serve Data Platform ---
+    subgraph Platform ["fa:fa-gears Self-Serve Data Platform (The Enabler)"]
+        direction LR
+        INFRA[/"fa:fa-cloud-arrow-up Provisioning Engine<br/>(IaC / K8s / Sidecars)"/]
+        
+        subgraph Intelligence ["fa:fa-microscope Mesh Plane Intelligence"]
+            DISCO(["fa:fa-magnifying-glass Catalog & Lineage"])
+            OBSERV(["fa:fa-chart-line Observability & SLOs"])
+        end
+    end
+
+    %% --- Pillars 1 & 2: Decentralized Domains & Data as a Product ---
+    subgraph Mesh ["fa:fa-network-wired Decentralized Data Mesh"]
+        direction TB
+        
+        subgraph DomainA ["fa:fa-sack-dollar Sales Domain"]
+            DA_TEAM["fa:fa-users-gear Sales Team"]
+            DA_PROD[("fa:fa-box-open Sales Data Product<br/>(Clean Transactions)")]
+            DA_TEAM -.-> DA_PROD
+        end
+
+        subgraph DomainB ["fa:fa-bullhorn Marketing Domain"]
+            DB_TEAM["fa:fa-users-gear Growth Team"]
+            DB_PROD[("fa:fa-box-open Campaign Data Product<br/>(Lead Analytics)")]
+            DB_TEAM -.-> DB_PROD
+        end
+
+        subgraph DomainC ["fa:fa-mobile-screen Product Domain"]
+            DC_TEAM["fa:fa-users-gear App Eng Team"]
+            DC_PROD[("fa:fa-box-open Usage Data Product<br/>(Clickstream)")]
+            DC_TEAM -.-> DC_PROD
+        end
+    end
+
+    %% --- Core Relationships ---
+    
+    %% Infra providing the "Utility"
+    INFRA ====>|Scaffolds| DomainA
+    INFRA ====>|Scaffolds| DomainB
+    INFRA ====>|Scaffolds| DomainC
+
+    %% Governance injecting "Rules"
+    POLICIES -.->|Injected Policy| DA_PROD
+    POLICIES -.->|Injected Policy| DB_PROD
+    POLICIES -.->|Injected Policy| DC_PROD
+
+    %% Metadata Extraction
+    DA_PROD -- "Telemetry" --> Intelligence
+    DB_PROD -- "Telemetry" --> Intelligence
+    DC_PROD -- "Telemetry" --> Intelligence
+
+    %% Cross-Domain P2P (The Network Effect)
+    DB_PROD -->|Consumes| DA_PROD
+    DA_PROD -->|Consumes| DC_PROD
+    DC_PROD -->|Consumes| DB_PROD
+
+    %% Principle Annotations
+    N1(/"fa:fa-user-check Principle 1:<br/>Domain Ownership"/)
+    N2(/"fa:fa-gem Principle 2:<br/>Data as a Product"/)
+    N3(/"fa:fa-screwdriver-wrench Principle 3:<br/>Self-Serve Infrastructure"/)
+    N4(/"fa:fa-scale-balanced Principle 4:<br/>Fed. Governance"/)
+
+    %% Assignments
+    class INFRA platformNode
+    class DISCO,OBSERV intelligenceNode
+    class GOV,POLICIES govNode
+    class DA_TEAM,DB_TEAM,DC_TEAM teamNode
+    class DA_PROD,DB_PROD,DC_PROD productNode
+    class N1,N2,N3,N4 principleNode
+
+    %% Links to Principles
+    N1 --- Mesh
+    N2 --- DA_PROD
+    N3 --- INFRA
+    N4 --- GOV_P
+
+    %% Subgraph Styling
+    style GOV_P fill:#fff1f2,stroke:#e11d48,stroke-width:2px,stroke-dasharray: 5 5
+    style Platform fill:#fffbeb,stroke:#d4a017,stroke-width:2px
+    style Mesh fill:#f8fafc,stroke:#475569,stroke-width:2px
+    style Intelligence fill:#f0fdf4,stroke:#16a34a,stroke-dasharray: 3 3
+    style DomainA fill:#f0f9ff,stroke:#0ea5e9
+    style DomainB fill:#f0f9ff,stroke:#0ea5e9
+    style DomainC fill:#f0f9ff,stroke:#0ea5e9
