@@ -1,0 +1,107 @@
+flowchart TB
+    direction TB
+
+    %% Global Node Definitions
+    subgraph Sources ["fa:fa-database Data Sources"]
+        direction LR
+        S1["fa:fa-table  Transactional DBs"]
+        S2["fa:fa-cloud  APIs & Webhooks"]
+        S3["fa:fa-microchip  IoT & Events"]
+        S4["fa:fa-file-csv  Flat Files / SFTP"]
+    end
+
+    subgraph Ingestion ["fa:fa-shuffle Ingestion & Processing"]
+        direction TB
+        subgraph FlowTypes ["Movement Frameworks"]
+            direction LR
+            CDC[["fa:fa-sync  CDC<br/>(Debezium)"]]
+            STREAM[["fa:fa-stream  Stream Processing<br/>(Flink / Spark)"]]
+            BATCH[["fa:fa-calendar-alt  Batch ETL<br/>(Airflow / dbt)"]]
+        end
+        note1>Low Latency < 1s]
+        note2>Scheduled Throughput]
+    end
+
+    subgraph Lakehouse ["fa:fa-warehouse Modern Data Lakehouse (Delta / Iceberg / Hudi)"]
+        direction TB
+        
+        subgraph Medallion ["Medallion Architecture Framework"]
+            direction LR
+            BRONZE[(fa:fa-archive Bronze<br/><b>RAW / LANDING</b>)]
+            SILVER[(fa:fa-broom Silver<br/><b>INTEGRATED / CLEAN</b>)]
+            GOLD[(fa:fa-star Gold<br/><b>ANALYTIC / CURATED</b>)]
+            
+            BRONZE ==>|"Schema Validation"| SILVER
+            SILVER ==>|"Business Transformation"| GOLD
+        end
+
+        subgraph Management ["fa:fa-gears Governance & Operations"]
+            direction LR
+            CATALOG[/fa:fa-book Unified Catalog\]
+            GOV{{fa:fa-shield-halved Data Governance}}
+            DQ{{"fa:fa-vial-circle-check Quality Gates"}}
+            OBV{{"fa:fa-eye Observability"}}
+        end
+    end
+
+    subgraph Consumption ["fa:fa-rocket Insight & Activation"]
+        direction LR
+        BI{{"fa:fa-chart-column<br/>BI & Viz"}}
+        ML{{"fa:fa-brain<br/>Data Science"}}
+        API{{"fa:fa-code<br/>Serving APIs"}}
+        APP{{"fa:fa-arrows-rotate<br/>Reverse ETL"}}
+    end
+
+    %% Optimized Flow Paths
+    S1 --> CDC
+    S2 --> STREAM
+    S3 --> STREAM
+    S4 --> BATCH
+
+    CDC ==> BRONZE
+    STREAM ==> BRONZE
+    BATCH ==> BRONZE
+
+    GOLD ==> BI
+    GOLD ==> ML
+    GOLD ==> API
+    GOLD ==> APP
+
+    %% Detailed Connections
+    CATALOG --- Medallion
+    DQ -.->|Monitors| SILVER
+    DQ -.->|Enforces| GOLD
+    GOV -.->|Policies| Lakehouse
+    OBV -.->|Telemetry| Ingestion
+    OBV -.->|Lineage| Medallion
+
+    note1 --- STREAM
+    note2 --- BATCH
+
+    %% Styling Definitions
+    classDef sourceStyle fill:#eceff1,stroke:#455a64,stroke-width:2px,color:#263238
+    classDef processStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1,font-weight:bold
+    classDef bronzeStyle fill:#cd7f32,color:#fff,stroke:#3d2b1f,stroke-width:2px
+    classDef silverStyle fill:#bdc3c7,color:#2c3e50,stroke:#7f8c8d,stroke-width:2px
+    classDef goldStyle fill:#f1c40f,color:#000,stroke:#d4af37,stroke-width:3px
+    classDef tools fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    classDef meta fill:#ffffff,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    classDef noteStyle fill:#fff9c4,stroke:#fbc02d,stroke-width:1px,font-size:11px,font-style:italic
+
+    %% Applying Classes
+    class S1,S2,S3,S4 sourceStyle;
+    class CDC,STREAM,BATCH processStyle;
+    class BI,ML,API,APP tools;
+    class BRONZE bronzeStyle;
+    class SILVER silverStyle;
+    class GOLD goldStyle;
+    class CATALOG,GOV,DQ,OBV meta;
+    class note1,note2 noteStyle;
+
+    %% Subgraph Styling
+    style Sources fill:#f8f9fa,stroke:#b0bec5,stroke-width:2px,stroke-dasharray: 5 5
+    style Ingestion fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style Lakehouse fill:#fffdf7,stroke:#ffa000,stroke-width:2px
+    style Consumption fill:#fdf7ff,stroke:#9c27b0,stroke-width:2px
+    style Medallion fill:#ffffff,stroke:#cfd8dc,stroke-width:2px
+    style Management fill:#f1f8e9,stroke:#4caf50,stroke-width:1px,stroke-dasharray: 3 3
