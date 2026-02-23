@@ -1,0 +1,63 @@
+graph TD
+    classDef cloud fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef storage fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef compute fill:#dfd,stroke:#333,stroke-width:2px;
+    classDef security fill:#fbb,stroke:#333,stroke-width:2px;
+
+    subgraph Phase1_Data_Ingestion["Phase 1: Secure Data Foundation"]
+        S3_Raw[("Amazon S3: Raw Genomic Data (FASTQ/BAM)")]
+        S3_Structured[("Amazon S3: Clinical Metadata & Phenotypes")]
+        Glue[AWS Glue: ETL & Metadata Catalog]
+    end
+
+    subgraph Phase2_RAG_Pipeline["Phase 2: RAG & Knowledge Retrieval"]
+        Kendra[Amazon Kendra: Enterprise Search]
+        OpenSearch[(Amazon OpenSearch: Vector Database)]
+        Bedrock_Embed[Amazon Bedrock: Titan Embedding Model]
+    end
+
+    subgraph Phase3_AI_Reasoning["Phase 3: AI Assistant & LLM Logic"]
+        Bedrock_LLM[Amazon Bedrock: Claude 3.5 Sonnet / Anthropic]
+        Lambda[AWS Lambda: Logic Orchestrator]
+        StepFunc[AWS Step Functions: Multi-step Reasoning]
+    end
+
+    subgraph Phase4_Interface["Phase 4: Researcher Interface"]
+        Amplify[AWS Amplify: Streamlit/React Interface]
+        API_GW[Amazon API Gateway]
+    end
+
+    subgraph Governance_Security["Compliance & Security (HIPAA/GDPR)"]
+        IAM[AWS IAM: Role Based Access Control]
+        KMS[AWS KMS: Data Encryption]
+        CloudTrail[AWS CloudTrail: Audit Logs]
+        Macie[Amazon Macie: PII Identification]
+    end
+
+    %% Flow Connections
+    S3_Raw --> Glue
+    S3_Structured --> Glue
+    Glue --> OpenSearch
+    
+    Amplify --> API_GW
+    API_GW --> Lambda
+    Lambda --> StepFunc
+    
+    StepFunc --> Bedrock_Embed
+    Bedrock_Embed --> OpenSearch
+    OpenSearch --> Bedrock_LLM
+    
+    Bedrock_LLM --> Lambda
+    Lambda --> API_GW
+    
+    %% Governance Overlays
+    KMS -.-> S3_Raw
+    KMS -.-> S3_Structured
+    IAM -.-> Bedrock_LLM
+    CloudTrail -.-> Phase3_AI_Reasoning
+
+    %% Styling
+    class S3_Raw,S3_Structured storage;
+    class Bedrock_LLM,Bedrock_Embed,Lambda,StepFunc compute;
+    class IAM,KMS,CloudTrail,Macie security;
+    class Phase1_Data_Ingestion,Phase2_RAG_Pipeline,Phase3_AI_Reasoning,Phase4_Interface cloud;
