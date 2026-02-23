@@ -1,0 +1,77 @@
+graph TD
+    classDef bronze fill:#CD7F32,stroke:#333,stroke-width:2px,color:#fff;
+    classDef silver fill:#C0C0C0,stroke:#333,stroke-width:2px,color:#000;
+    classDef gold fill:#FFD700,stroke:#333,stroke-width:2px,color:#000;
+    classDef tool fill:#E8E8E8,stroke:#333,stroke-dasharray: 5 5;
+
+    subgraph Sources ["Data Sources (Ingestion)"]
+        S1[(Network Logs - 5G/LTE)]
+        S2[(CRM - Salesforce)]
+        S3[(Billing Systems - XML/JSON)]
+        S4[(Call Detail Records - CDR)]
+    end
+
+    subgraph Databricks_Workspace ["Databricks Lakehouse (Medallion Architecture)"]
+        
+        subgraph Bronze_Layer ["Bronze: Raw Landing (Auto-Loader)"]
+            B1[raw_network_events]
+            B2[raw_customer_info]
+            B3[raw_cdr_stream]
+        end
+
+        subgraph Silver_Layer ["Silver: DBT Transformation (Cleansed)"]
+            direction TB
+            ST1[stg_network_performance]
+            ST2[stg_customers]
+            ST3[stg_call_records]
+            
+            ST1 & ST2 & ST3 --> INT[int_subscriber_activity_joined]
+        end
+
+        subgraph Gold_Layer ["Gold: Business Ready (Aggregated)"]
+            G1[fact_network_outages]
+            G2[fact_billing_monthly]
+            G3[dim_subscriber_lifecycle]
+            G4[fct_churn_prediction_features]
+        end
+    end
+
+    subgraph Orchestration ["DBT Cloud / Workflows"]
+        D1[dbt run]
+        D2[dbt test]
+        D3[dbt docs/lineage]
+    end
+
+    subgraph Consumption ["Analytics & ML"]
+        C1[PowerBI Dashboards]
+        C2[MLflow - Churn Model]
+        C3[Regulatory Reporting]
+    end
+
+    %% Flow Connections
+    S1 & S4 --> B1
+    S2 --> B2
+    S3 --> B3
+
+    B1 --> ST1
+    B2 --> ST2
+    B3 --> ST3
+
+    INT --> G1
+    INT --> G2
+    INT --> G3
+    INT --> G4
+
+    G1 & G2 & G3 & G4 --> C1
+    G4 --> C2
+    G2 --> C3
+
+    %% Tooling Relationships
+    D1 -.-> Silver_Layer
+    D1 -.-> Gold_Layer
+    D2 -.-> Silver_Layer
+    
+    class B1,B2,B3 bronze;
+    class ST1,ST2,ST3,INT silver;
+    class G1,G2,G3,G4 gold;
+    class D1,D2,D3 tool;
