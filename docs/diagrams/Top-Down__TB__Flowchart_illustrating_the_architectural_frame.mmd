@@ -1,0 +1,98 @@
+graph TB
+    %% Configuration
+    direction TB
+
+    subgraph UC_ROOT ["<br/><b>Unity Catalog Unified Governance Platform</b>"]
+        direction TB
+
+        subgraph IdentitySec ["<b>1. Identity & Security</b>"]
+            direction LR
+            IDP([Identity Provider: Entra ID / Okta / SCIM])
+            POLICIES{Centralized Policies}
+            IDP -->|Syncs Users & Groups| POLICIES
+        end
+
+        subgraph UnityCatalog ["<b>2. Unified Namespace (Three-Tier)</b>"]
+            direction TB
+            META{{Metastore: Global Account Level}}
+            
+            subgraph CAT_PROD ["Production Catalog"]
+                direction TB
+                C1[(Main_Prod)]
+                C1 --> S1[Schema: Sales]
+                C1 --> S2[Schema: Finance]
+            end
+
+            subgraph CAT_DEV ["Development Catalog"]
+                direction TB
+                C2[(Dev_Sandbox)]
+                C2 --> S3[Schema: Data_Science]
+            end
+
+            META ==> C1 & C2
+            POLICIES -.->|Grants Access| META
+        end
+
+        subgraph DataObjects ["<b>3. Managed & External Assets</b>"]
+            direction LR
+            T1[/Managed Delta Tables/]
+            T2[/External S3/ADLS Tables/]
+            T3[/Volumes & ML Models/]
+        end
+
+        subgraph GovServices ["<b>4. Governance & Observation Services</b>"]
+            direction LR
+            LINEAGE[[Automated Lineage]]
+            AUDIT[[Centralized Audit]]
+            SHARING[[Delta Sharing]]
+            SEARCH[[AI-Powered Search]]
+        end
+    end
+
+    %% Mapping Relationships
+    S1 & S2 --- T1 & T2
+    S3 --- T3
+
+    T1 & T2 & T3 -.->|Metadata & Lineage| GovServices
+    POLICIES -.->|Row/Column Filters| DataObjects
+
+    %% Annotations
+    N1[<b>Global Governance</b><br/>Single Metastore per Region] 
+    N2[<b>Secure Collaboration</b><br/>Open Standard Data Sharing]
+    N3[<b>End-to-End Tracing</b><br/>Column-Level Dependency]
+
+    N1 -.-> META
+    N2 -.-> SHARING
+    N3 -.-> LINEAGE
+
+    %% Modern Professional Styling
+    classDef default font-family:arial,font-size:13px;
+    classDef highlight fill:#2c3e50,color:#fff,stroke:#2c3e50,stroke-width:2px;
+    classDef security fill:#fff0f6,stroke:#d63384,stroke-width:2px,color:#d63384;
+    classDef catalog fill:#e7f5ff,stroke:#228be6,stroke-width:2px,color:#1864ab;
+    classDef storage fill:#ebfbee,stroke:#40c057,stroke-width:2px,color:#2b8a3e;
+    classDef services fill:#fff9db,stroke:#fab005,stroke-width:2px,color:#868e96;
+    classDef note fill:#ffffff,stroke:#adb5bd,stroke-dasharray: 5 5,color:#495057,font-size:11px;
+
+    %% Subgraph Styling
+    style UC_ROOT fill:#f8f9fa,stroke:#343a40,stroke-width:3px
+    style IdentitySec fill:#fff,stroke:#d63384,stroke-width:1.5px,stroke-dasharray: 3 3
+    style UnityCatalog fill:#fff,stroke:#228be6,stroke-width:1.5px,stroke-dasharray: 3 3
+    style DataObjects fill:#fff,stroke:#40c057,stroke-width:1.5px,stroke-dasharray: 3 3
+    style GovServices fill:#fff,stroke:#fab005,stroke-width:1.5px,stroke-dasharray: 3 3
+    style CAT_PROD fill:#f1f3f5,stroke:#dee2e6
+    style CAT_DEV fill:#f1f3f5,stroke:#dee2e6
+
+    %% Node Applications
+    class META highlight
+    class POLICIES,IDP security
+    class C1,C2,S1,S2,S3 catalog
+    class T1,T2,T3 storage
+    class LINEAGE,AUDIT,SHARING,SEARCH services
+    class N1,N2,N3 note
+
+    %% Link Styling
+    linkStyle default stroke:#868e96,stroke-width:1px
+    linkStyle 3,5,11,12,13,14,15,16 stroke:#adb5bd,stroke-width:1px,stroke-dasharray: 3 3
+    linkStyle 4 stroke:#228be6,stroke-width:3px
+    linkStyle 10 stroke:#d63384,stroke-width:2px,stroke-dasharray: 3 3
