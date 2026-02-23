@@ -1,45 +1,71 @@
-graph TD
-    subgraph Phase1 [Phase 1: Foundation - The Senior Developer]
-        A[Master Programming] --> B[Deep Dive into Data Structures & Algorithms]
-        B --> C[Adopt SOLID/DRY/KISS Principles]
-        C --> D[Master DevOps & CI/CD Pipelines]
-        D --> E[Understanding System Internals]
+graph TB
+    subgraph Data_Sources [Market Data Providers]
+        NAS[NASDAQ / NYSE L1/L2]
+        CRY[Crypto Exchanges]
+        FX[Forex Providers]
     end
 
-    subgraph Phase2 [Phase 2: Architectural Patterns]
-        F[Monolith vs Microservices] --> G[Event-Driven Architecture]
-        G --> H[Serverless & Cloud Native]
-        H --> I[API Design: REST/GraphQL/gRPC]
-        I --> J[Caching & Messaging Patterns: Redis/Kafka]
+    subgraph Ingestion_Layer [Ingestion Layer]
+        LB[Load Balancer / API Gateway]
+        IngestService[Ingest Microservice - Go/Rust]
+        SchemaReg[Confluent Schema Registry]
     end
 
-    subgraph Phase3 [Phase 3: Data & Security]
-        K[Database Choice: SQL vs NoSQL] --> L[CAP Theorem & Data Consistency]
-        L --> M[Security Architecture: OAuth2/OIDC]
-        M --> N[Identity Access Management - IAM]
-        N --> O[Compliance: GDPR/SOC2/HIPAA]
+    subgraph Streaming_Bus [Message Bus - Event Backbone]
+        direction LR
+        K_Raw[Kafka Topic: ticks.raw]
+        K_Valid[Kafka Topic: ticks.validated]
     end
 
-    subgraph Phase4 [Phase 4: Soft Skills & Business]
-        P[Stakeholder Management] --> Q[Cost Optimization - FinOps]
-        Q --> R[Decision Documentation - ADRs]
-        R --> S[Public Speaking & Mentorship]
-        S --> T[Bridging Business Requirements to Tech]
+    subgraph Processing_Layer [Stream Processing - Flink / Spark]
+        Validation[Check & Normalization]
+        Windowing[Time-Window Aggregations]
+        Indicators[Technical Indicators / RSI / MACD]
+        Anomalies[Anomaly Detection]
     end
 
-    subgraph Phase5 [Phase 5: Industry Recognition]
-        U[Cloud Certifications: AWS/Azure/GCP] --> V[Portfolio of Complex Projects]
-        V --> W{Solution Architect Role}
+    subgraph Storage_Layer [Storage Tier]
+        TSDB[(InfluxDB / QuestDB - Time Series)]
+        ObjectStore[AWS S3 / Iceberg - Historical]
+        Cache[(Redis - Real-time Prices)]
     end
 
-    Phase1 --> Phase2
-    Phase2 --> Phase3
-    Phase3 --> Phase4
-    Phase4 --> Phase5
+    subgraph Consumption_Layer [Serving Layer]
+        WebSockets[WebSocket Gateway]
+        Push[Push Notifications]
+        ML[ML Model Ops / Feature Store]
+        Dash[Real-time Dashboard]
+    end
 
-    style Phase1 fill:#e1f5fe,stroke:#01579b
-    style Phase2 fill:#e8f5e9,stroke:#1b5e20
-    style Phase3 fill:#fff3e0,stroke:#e65100
-    style Phase4 fill:#f3e5f5,stroke:#4a148c
-    style Phase5 fill:#ffebee,stroke:#b71c1c
-    style W fill:#ffd600,stroke:#000,stroke-width:2px
+    %% Flow Connections
+    NAS & CRY & FX --> LB
+    LB --> IngestService
+    IngestService --> SchemaReg
+    IngestService --> K_Raw
+    
+    K_Raw --> Validation
+    Validation --> K_Valid
+    
+    K_Valid --> Windowing
+    K_Valid --> Anomalies
+    
+    Windowing & Indicators --> TSDB
+    Windowing --> Cache
+    
+    Anomalies --> Push
+    K_Valid --> ObjectStore
+    
+    Cache --> WebSockets
+    TSDB --> Dash
+    ObjectStore --> ML
+
+    %% Styling
+    classDef source fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef processing fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef storage fill:#dfd,stroke:#333,stroke-width:2px;
+    classDef bus fill:#fdd,stroke:#333,stroke-width:2px;
+
+    class NAS,CRY,FX source;
+    class Validation,Windowing,Indicators,Anomalies processing;
+    class TSDB,ObjectStore,Cache storage;
+    class K_Raw,K_Valid bus;
