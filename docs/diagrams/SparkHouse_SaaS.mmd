@@ -1,0 +1,32 @@
+graph TD
+    User[User / CLI / SDK] -->|HTTPS/gRPC| Gateway[API Gateway]
+    
+    subgraph "Control Plane (Primary Cloud - e.g. AWS)"
+        Gateway --> Auth[Identity & Auth Service]
+        Gateway --> API[Control Plane API]
+        
+        API --> JobMgr[Job Manager]
+        API --> ClusterMgr[Cluster Manager]
+        API --> Billing[Billing Agent]
+        API --> MetaStore[(Metadata Store - Postgres)]
+    end
+    
+    subgraph "Data Plane - Cluster A (GCP/GKE)"
+        K8sOpA[SparkHouse Operator]
+        subgraph "Tenant X Namespace"
+            JobAX[SparkDriver] <--> WorkersAX[Workers]
+        end
+    end
+
+    subgraph "Data Plane - Cluster B (Alibaba/ACK)"
+        K8sOpB[SparkHouse Operator]
+        subgraph "Tenant X Namespace "
+            JobBX[SparkDriver] <--> WorkersBX[Workers]
+        end
+    end
+    
+    ClusterMgr -->|Mutual TLS / gRPC| K8sOpA
+    ClusterMgr -->|Mutual TLS / gRPC| K8sOpB
+    
+    JobMgr -.->|Status Checks| ClusterMgr
+    Billing -.->|Usage Events| ExtBilling[Stripe / Marketplace]
