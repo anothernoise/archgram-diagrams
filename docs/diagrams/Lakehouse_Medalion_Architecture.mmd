@@ -1,0 +1,29 @@
+graph TB
+    subgraph Sources["Data Sources"]
+        S1[Transactional DBs]
+        S2[APIs & Webhooks]
+        S3[IoT Sensors]
+        S4[File Uploads]
+    end
+    subgraph Ingestion
+        S1 --> CDC[Change Data Capture]
+        S2 --> STREAM[Stream Processor]
+        S3 --> STREAM
+        S4 --> BATCH[Batch Loader]
+    end
+    subgraph Lakehouse["Data Lakehouse"]
+        CDC --> BRONZE[(Bronze - Raw)]
+        STREAM --> BRONZE
+        BATCH --> BRONZE
+        BRONZE --> SILVER[(Silver - Cleaned)]
+        SILVER --> GOLD[(Gold - Business)]
+    end
+    subgraph Consumption
+        GOLD --> BI[BI Dashboards]
+        GOLD --> ML[ML Models]
+        GOLD --> API[Data APIs]
+        GOLD --> SHARE[Data Sharing]
+    end
+    style BRONZE fill:#8B6914,color:#fff
+    style SILVER fill:#708090,color:#fff
+    style GOLD fill:#c97b2a,color:#fff
