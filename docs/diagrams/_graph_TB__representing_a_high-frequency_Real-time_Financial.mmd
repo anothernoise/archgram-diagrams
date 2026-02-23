@@ -1,0 +1,71 @@
+graph TB
+    subgraph Data_Sources [Market Data Providers]
+        NAS[NASDAQ / NYSE L1/L2]
+        CRY[Crypto Exchanges]
+        FX[Forex Providers]
+    end
+
+    subgraph Ingestion_Layer [Ingestion Layer]
+        LB[Load Balancer / API Gateway]
+        IngestService[Ingest Microservice - Go/Rust]
+        SchemaReg[Confluent Schema Registry]
+    end
+
+    subgraph Streaming_Bus [Message Bus - Event Backbone]
+        direction LR
+        K_Raw[Kafka Topic: ticks.raw]
+        K_Valid[Kafka Topic: ticks.validated]
+    end
+
+    subgraph Processing_Layer [Stream Processing - Flink / Spark]
+        Validation[Validation & Normalization]
+        Windowing[Time-Window Aggregations]
+        Indicators[Technical Indicators / RSI / MACD]
+        Anomalies[Anomaly Detection]
+    end
+
+    subgraph Storage_Layer [Storage Tier]
+        TSDB[(InfluxDB / QuestDB - Time Series)]
+        ObjectStore[AWS S3 / Iceberg - Historical]
+        Cache[(Redis - Real-time Prices)]
+    end
+
+    subgraph Consumption_Layer [Serving Layer]
+        WebSockets[WebSocket Gateway]
+        Push[Push Notifications]
+        ML[ML Model Ops / Feature Store]
+        Dash[Real-time Dashboard]
+    end
+
+    %% Flow Connections
+    NAS & CRY & FX --> LB
+    LB --> IngestService
+    IngestService --> SchemaReg
+    IngestService --> K_Raw
+    
+    K_Raw --> Validation
+    Validation --> K_Valid
+    
+    K_Valid --> Windowing
+    K_Valid --> Anomalies
+    
+    Windowing & Indicators --> TSDB
+    Windowing --> Cache
+    
+    Anomalies --> Push
+    K_Valid --> ObjectStore
+    
+    Cache --> WebSockets
+    TSDB --> Dash
+    ObjectStore --> ML
+
+    %% Styling
+    classDef source fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef processing fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef storage fill:#dfd,stroke:#333,stroke-width:2px;
+    classDef bus fill:#fdd,stroke:#333,stroke-width:2px;
+
+    class NAS,CRY,FX source;
+    class Validation,Windowing,Indicators,Anomalies processing;
+    class TSDB,ObjectStore,Cache storage;
+    class K_Raw,K_Valid bus;
