@@ -1,0 +1,63 @@
+graph TD
+    classDef domain fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef resource fill:#fff,stroke:#333,stroke-dasharray: 5 5;
+    classDef milestone fill:#ff9900,stroke:#fff,stroke-width:4px,color:#fff;
+
+    subgraph Preparation_Phase [Preparation Pillars]
+        A[Leadership Principles] --> A1[Identify 2-3 Stories per LP]
+        A --> A2[STAR Method Formatting]
+        
+        B[Technical Fundamentals] --> B1[Networking: VPC, Subnets, BGP]
+        B --> B2[Storage: S3, EBS, EFS, FSx]
+        B --> B3[Compute: EC2, Lambda, ECS/EKS]
+        B --> B4[Database: RDS, DynamoDB, Aurora]
+        
+        C[Well-Architected Framework] --> C1[Operational Excellence]
+        C --> C2[Security & Compliance]
+        C --> C3[Reliability & High Availability]
+        C --> C4[Performance Efficiency]
+        C --> C5[Cost Optimization]
+        C --> C6[Sustainability]
+    end
+
+    subgraph Interview_Components [The Interview Loop]
+        D[Writing Sample] --> D1[Clear Professional Communication]
+        
+        E[Technical Deep Dive] --> E1[Whiteboarding Challenges]
+        E --> E2[Justifying Design Choices]
+        E --> E3[Trade-off Analysis]
+        
+        F[Behavioral Rounds] --> F1[LP Specific Questions]
+        F --> F2[Customer Obsession Focus]
+    end
+
+    subgraph Study_Resources [Resources]
+        R1[AWS Whitepapers]
+        R2[AWS Architecture Center]
+        R3[Re:Invent Deep Dive Videos]
+        R4[Practice Design Challenges]
+    end
+
+    Preparation_Phase --> Interview_Components
+    Study_Resources -.-> Preparation_Phase
+
+    M1((START)) --> A
+    M1 --> B
+    M1 --> C
+    
+    E2 --> E3
+    E3 --> G{Decision Selection}
+    G -- Cost vs Perf --> H[Final Architecture]
+
+    subgraph Goal [Success Criteria]
+        S[Earn Trust]
+        S1[Dive Deep]
+        S2[Think Big]
+    end
+
+    F2 --- S
+    E3 --- S1
+    D1 --- S2
+
+    class A,B,C domain;
+    class M1,H,S milestone;
