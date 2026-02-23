@@ -1,0 +1,65 @@
+flowchart TD
+    subgraph Source_Systems [Data Sources]
+        direction LR
+        FB[Facebook Ads API]
+        GA[Google Ads API]
+        TT[TikTok Ads API]
+        CRM[Salesforce CRM]
+    end
+
+    subgraph Ingestion_Layer [Ingestion & CDC]
+        Fivetran{Fivetran / Airbyte}
+        S3[AWS S3 Staging Area]
+        Landing[Snowflake Landing Zone]
+    end
+
+    subgraph Transformation_Layer [SCD Type 2 Processing]
+        direction TB
+        Raw[raw_ad_campaigns]
+        
+        subgraph SCD2_Logic [Stream & Task Process]
+            Stream[Snowflake Stream on Raw]
+            Check{Change Detected?}
+            
+            Match[Match on Campaign_ID]
+            Close[Expiring Old Records\nSet: end_date = CURRENT_DATE\nstatus = 'INACTIVE']
+            Insert[Insert New Record\nSet: start_date = CURRENT_DATE\nend_date = NULL\nis_current = TRUE]
+        end
+        
+        Dim[dim_campaigns_scd2]
+    end
+
+    subgraph Analytics_Layer [Consumption]
+        Fact[fact_ad_performance]
+        Bio[PowerBI / Sigma / Looker]
+    end
+
+    %% Data Flow Connections
+    FB & GA & TT & CRM --> Fivetran
+    Fivetran --> S3
+    S3 --> Landing
+    Landing --> Raw
+    
+    Raw --> Stream
+    Stream --> Check
+    Check -- "Update/Delete" --> Match
+    Match --> Close
+    Close --> Insert
+    Check -- "New Record" --> Insert
+    
+    Insert --> Dim
+    Dim --> Fact
+    Fact --> Bio
+
+    %% Styling
+    style SCD2_Logic fill:#f9f,stroke:#333,stroke-width:2px
+    style Landing fill:#e1f5fe,stroke:#01579b
+    style Dim fill:#fff9c4,stroke:#fbc02d
+    style Stream fill:#c8e6c9,stroke:#2e7d32
+    style Fact fill:#d1c4e9,stroke:#512da8
+
+    %% Annotations
+    note1[CDC Capture: TIMESTAMP or Log-based]
+    note2[SCD2 tracking: Spend, Budget,\nTargeting Criteria changes]
+    Raw -.-> note1
+    Dim -.-> note2
