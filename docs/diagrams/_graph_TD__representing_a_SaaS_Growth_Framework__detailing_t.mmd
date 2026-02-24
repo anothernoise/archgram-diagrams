@@ -1,0 +1,47 @@
+graph TD
+    accTitle: SaaS Growth Framework
+    accDescr: A comprehensive flowchart detailing the stages of growing a Software as a Service business from foundation to scaling.
+
+    subgraph Phase1 [Stage 1: Foundation & Product-Market Fit]
+        A[Identify Pain Point] --> B[MVP Development]
+        B --> C[Beta Testing & Feedback]
+        C --> D{Product-Market Fit?}
+        D -- No --> B
+        D -- Yes --> E[Define Ideal Customer Profile - ICP]
+    end
+
+    subgraph Phase2 [Stage 2: Acquisition & Lead Gen]
+        E --> F[Content Marketing/SEO]
+        E --> G[Paid Ads - Search/Social]
+        E --> H[Cold Outbound/Social Selling]
+        F & G & H --> I[Landing Page & Free Trial/Freemium]
+    end
+
+    subgraph Phase3 [Stage 3: Activation & Retention]
+        I --> J[Onboarding Workflow]
+        J --> K[Aha! Moment]
+        K --> L[Subscription Conversion]
+        L --> M[Customer Success Management]
+        M --> N{Churn Analysis}
+        N -- High Churn --> J
+        N -- Low Churn --> O[Expansion/Upsell]
+    end
+
+    subgraph Phase4 [Stage 4: Scaling & Optimization]
+        O --> P[Referral Programs]
+        O --> Q[Partnerships & Integrations]
+        O --> R[PLG - Product Led Growth]
+        P & Q & R --> S[Revenue Compounding]
+    end
+
+    %% Styling
+    style Phase1 fill:#f9f,stroke:#333,stroke-width:2px
+    style Phase2 fill:#bbf,stroke:#333,stroke-width:2px
+    style Phase3 fill:#bfb,stroke:#333,stroke-width:2px
+    style Phase4 fill:#fdb,stroke:#333,stroke-width:2px
+    style D fill:#fff,stroke:#f00
+    style K fill:#fffb00,stroke:#333
+
+    %% Connectors
+    S -.->|Reinvest Profits| F
+    S -.->|Data-Driven Insights| E
