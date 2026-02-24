@@ -1,0 +1,58 @@
+graph TD
+    user((Internet User))
+    
+    subgraph AWS_Cloud ["AWS Cloud (Global)"]
+        RT53[Route 53 DNS]
+        CF[CloudFront CDN]
+        S3_Static[S3 Bucket: Static Assets]
+        
+        subgraph Region ["AWS Region (e.g., us-east-1)"]
+            
+            subgraph Public_Subnet ["Public Subnet"]
+                ALB[Application Load Balancer]
+                NAT[NAT Gateway]
+            end
+            
+            subgraph Private_Subnet ["Private Subnet (App Tier)"]
+                ASG[Auto Scaling Group]
+                EC2_1[EC2 Instance A]
+                EC2_2[EC2 Instance B]
+            end
+            
+            subgraph Data_Subnet ["Private Subnet (Data Tier)"]
+                RDS[(RDS Multi-AZ: MySQL/Postgres)]
+                ElastiCache[(ElastiCache: Redis)]
+            end
+            
+            subgraph Management ["Management & Logging"]
+                CW[CloudWatch]
+                IAM[IAM Roles]
+                SM[AWS Secrets Manager]
+            end
+        end
+    end
+
+    %% Connections
+    user --> RT53
+    RT53 --> CF
+    CF -.-> S3_Static
+    CF --> ALB
+    
+    ALB --> EC2_1
+    ALB --> EC2_2
+    
+    EC2_1 & EC2_2 --> RDS
+    EC2_1 & EC2_2 --> ElastiCache
+    EC2_1 & EC2_2 --> NAT
+    NAT --> IGW[Internet Gateway]
+    
+    EC2_1 & EC2_2 -.-> CW
+    EC2_1 & EC2_2 -.-> SM
+
+    %% Styling
+    style AWS_Cloud fill:#f9f,stroke:#333,stroke-width:2px
+    style CF fill:#ff9900,color:#fff
+    style ALB fill:#ff9900,color:#fff
+    style RDS fill:#3366ff,color:#fff
+    style S3_Static fill:#228b22,color:#fff
+    style ASG stroke-dasharray: 5 5
