@@ -1,0 +1,71 @@
+graph TB
+    subgraph External_Sources [Data Sources]
+        EHR[Electronic Health Records]
+        HL7[HL7 / FHIR Streams]
+        ICD[Medical Coding APIs]
+        IoT[Wearable Sensor Data]
+    end
+
+    subgraph Ingestion_Layer [Ingestion: Bronze Layer]
+        direction TB
+        Raw_Storage[(Cloud Landing Zone)]
+        UC_Raw_Table[UC: Bronze Managed Tables]
+        EHR -->|Batch ETL| Raw_Storage
+        HL7 -->|Structured Streaming| UC_Raw_Table
+        Raw_Storage --> UC_Raw_Table
+    end
+
+    subgraph Transformation_Layer [Processing: Silver Layer]
+        direction TB
+        Cleaning[Data Scrubbing & PII Masking]
+        Standardization[OMOP / CDISC Mapping]
+        UC_Silver_Table[UC: Silver Refined Tables]
+        UC_Raw_Table --> Cleaning
+        Cleaning --> Standardization
+        Standardization --> UC_Silver_Table
+    end
+
+    subgraph Analytics_Layer [Gold Layer: Data Products]
+        direction TB
+        Aggregates[Patient Risk Scoring]
+        Cohort[Clinical Trial Cohorts]
+        UC_Gold_Table[UC: Gold Data Products]
+        UC_Silver_Table --> Aggregates
+        Aggregates --> UC_Gold_Table
+        UC_Silver_Table --> Cohort
+        Cohort --> UC_Gold_Table
+    end
+
+    subgraph Unity_Catalog [Unity Catalog Governance]
+        direction TB
+        Metastore[Unified Metastore]
+        Lineage[Data Lineage & Audit]
+        Access[RBAC & Row-level Security]
+        Sharing[Delta Sharing Server]
+    end
+
+    subgraph Consumption [Data Sharing Service]
+        DP_Research[Product A: Clinical Research Feed]
+        DP_Billing[Product B: Revenue Cycle Analytics]
+        DP_Public[Product C: De-identified Stats]
+    end
+
+    %% Connections to UC
+    UC_Raw_Table -.-> Metastore
+    UC_Silver_Table -.-> Metastore
+    UC_Gold_Table -.-> Metastore
+    Metastore --- Access
+    Access --- Lineage
+
+    %% Data Product Sharing
+    UC_Gold_Table --> Sharing
+    Sharing -->|Secure Share| DP_Research
+    Sharing -->|Secure Share| DP_Billing
+    Sharing -->|Open Sharing| DP_Public
+
+    %% Styling
+    style Unity_Catalog fill:#f9f,stroke:#333,stroke-width:2px
+    style Ingestion_Layer fill:#e1f5fe,stroke:#01579b
+    style Transformation_Layer fill:#fff3e0,stroke:#e65100
+    style Analytics_Layer fill:#e8f5e9,stroke:#1b5e20
+    style Sharing fill:#fff9c4,stroke:#fbc02d,stroke-dasharray: 5 5
