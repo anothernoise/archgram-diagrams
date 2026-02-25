@@ -1,7 +1,7 @@
 # Slice: Untitled Slice
 
 **Phase:** mvp  
-**Priority:** 0
+**Priority:** 2
 
 ## User Scenario
 _No scenario_
