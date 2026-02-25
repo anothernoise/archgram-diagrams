@@ -1,0 +1,87 @@
+---
+config:
+  layout: elk
+  elk:
+    mergeEdges: true
+    nodePlacementStrategy: LINEAR_SEGMENTS
+    forceNodeModelOrder: true
+---
+graph TB
+    subgraph Client_Layer [User & Integration Layer]
+        UI[Web/Mobile Interface]
+        SDK[Python/JS SDKs]
+        API_GW[API Gateway / Auth]
+    end
+
+    subgraph Management_Plane [Control Plane]
+        Governance[Governance & Policy Engine]
+        Observability[Monitoring & Distributed Tracing]
+        Catalog[Model & Prompt Registry]
+        Cost[FinOps & Token Quotas]
+    end
+
+    subgraph Intelligence_Fabric [AI Core Fabric]
+        Router{Semantic Router}
+        subgraph Logic_Execution [Orchestration Engine]
+            Agent_Orch[Multi-Agent Orchestrator]
+            Tool_Service[Tool Execution Service]
+            Plan_Eng[Action Planner]
+        end
+        
+        subgraph Data_Context [Contextual Memory]
+            Vector_DB[(Vector Database - RAG)]
+            Graph_DB[(Knowledge Graph)]
+            Cache[(Semantic Cache - Redis)]
+        end
+    end
+
+    subgraph Inference_Mesh [Multi-Model Inference Mesh]
+        subgraph LLM_Tier_1 [Foundational Models]
+            GPT4[GPT-4o]
+            Claude[Claude 3.5]
+            Gemini[Gemini 1.5]
+        end
+        subgraph LLM_Tier_2 [Specialized/OSS Models]
+            Llama[Llama 3]
+            Mistral[Mistral Large]
+            FineTune[SFT Domain Models]
+        end
+        Load_Balancer[Global Inference LB]
+    end
+
+    subgraph Data_Pipeline [Data & Training Plane]
+        Data_Ingest[Streaming/Batch Ingestion]
+        ETL[Chunking & Embedding Jobs]
+        Trainer[Fine-tuning / LoRA Jobs]
+    end
+
+    %% Connections
+    UI --> API_GW
+    API_GW --> Router
+    Router --> Governance
+    Router --> Agent_Orch
+    
+    Agent_Orch --> Data_Context
+    Agent_Orch --> Plan_Eng
+    Plan_Eng --> Tool_Service
+    
+    Agent_Orch --> Load_Balancer
+    Load_Balancer --> LLM_Tier_1
+    Load_Balancer --> LLM_Tier_2
+    
+    LLM_Tier_1 --> Observability
+    LLM_Tier_2 --> Observability
+    
+    Data_Ingest --> ETL
+    ETL --> Vector_DB
+    ETL --> Graph_DB
+    
+    %% Styling
+    classDef primary fill:#2e7d32,color:#fff,stroke:#000,stroke-width:2px;
+    classDef secondary fill:#7ebc89,color:#000,stroke:#000,stroke-width:2px;
+    classDef storage fill:#ff9f1c,color:#fff,stroke:#000,stroke-width:2px;
+    
+    class Router,Agent_Orch,Plan_Eng primary;
+    class GPT4,Claude,Gemini,Llama secondary;
+    class Vector_DB,Graph_DB,Cache storage;
+    newnode[new node !]
