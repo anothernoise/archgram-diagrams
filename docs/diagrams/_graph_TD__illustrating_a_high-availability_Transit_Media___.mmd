@@ -1,0 +1,78 @@
+graph TD
+    classDef transit fill:#f9f9f9,stroke:#d3242e,stroke-width:2px;
+    classDef core fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef edge fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef storage fill:#f1f8e9,stroke:#33691e,stroke-width:2px;
+
+    subgraph User_Devices [Passenger Interface]
+        Mobile[iOS/Android App]
+        Web[Web Portal]
+        Kiosk[Station Digital Signage]
+    end
+
+    subgraph Edge_Infrastructure [In-Transit CDN Nodes]
+        direction TB
+        Bus_Server[On-Bus Micro-Cache]
+        Train_Server[Via-Rail/GO Local Server]
+        Edge_Auth[Local Auth Proxy]
+        
+        Bus_Server --> |Sync via 5G/LTE| Cloud_Gateway
+        Train_Server --> |Satellite/Fiber| Cloud_Gateway
+    end
+
+    subgraph Ingestion_Layer [Content & Data Ingestion]
+        direction LR
+        Studio[Studio Partners]
+        News[CBC/Global News RSS]
+        GTFS[Real-time Transit Feeds]
+        
+        Studio --> CMS[Content Management System]
+        News --> Stream_Proc[Apache Flink Stream Processor]
+        GTFS --> Stream_Proc
+    end
+
+    subgraph Cloud_Platform [Azure Canada Central / AWS Canada]
+        Cloud_Gateway(API Gateway & DRM)
+        
+        subgraph Media_Services [Transcoding & Delivery]
+            Encoder[Elemental MediaLive]
+            Packager[HLS/DASH Packager]
+            DRM[Widevine/FairPlay Service]
+        end
+
+        subgraph Core_Services [Microservices]
+            Auth[Identity Provider]
+            Recommendation[Personalization Engine]
+            Ads[Dynamic Ad Insertion - Canadian Targeted]
+            Analytics[Viewing Data Collector]
+        end
+
+        subgraph Storage_Layer [Data Persistence]
+            Video_Blob[(S3/Blob Storage - 4K Master)]
+            User_DB[(CosmosDB - User Profiles)]
+            Log_Store[(Elasticsearch - Metrics)]
+        end
+    end
+
+    subgraph CDN_Distribution [Distribution]
+        Akamai[Akamai/CloudFront Edge]
+    end
+
+    %% Connections
+    Mobile & Web & Kiosk <--> Edge_Auth
+    Edge_Infrastructure <--> Cloud_Gateway
+    Cloud_Gateway <--> Media_Services
+    Cloud_Gateway <--> Core_Services
+    
+    Media_Services --> Akamai
+    Akamai --> User_Devices
+    
+    CMS --> Video_Blob
+    Stream_Proc --> Core_Services
+    
+    Core_Services --> Storage_Layer
+
+    class Mobile,Web,Kiosk transit
+    class Bus_Server,Train_Server,Edge_Auth edge
+    class Cloud_Gateway,Encoder,Packager,Auth,Ads core
+    class Video_Blob,User_DB,Log_Store storage
