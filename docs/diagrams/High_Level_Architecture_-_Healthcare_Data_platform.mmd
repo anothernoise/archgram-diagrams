@@ -1,0 +1,79 @@
+graph TB
+    subgraph Edge_Layer ["Data Sources & Edge"]
+        IoT[Medical Devices/IoT]
+        EMR[Electronic Medical Records]
+        Sequencer[Genomic Sequencers]
+        Apps[Patient/Provider Apps]
+    end
+
+    subgraph Ingestion_Layer ["Ingestion Layer"]
+        KDS[Amazon Kinesis Data Streams]
+        Firehose[Amazon Data Firehose]
+        MKS[Amazon Managed Streaming for Kafka]
+        Transfer[AWS Transfer Family - SFTP/S3]
+    end
+
+    subgraph Processing_Layer ["Real-Time & Batch Processing"]
+        direction TB
+        subgraph Stream_Processing
+            Flink[Amazon Managed Service for Apache Flink]
+            Lambda[AWS Lambda - Triggered Events]
+        end
+        subgraph Genomics_Workflow
+            HealthOmics[Amazon Omics - Workflows]
+            Batch[AWS Batch]
+        end
+    end
+
+    subgraph Storage_Layer ["Healthcare Data Lake & Lakehouse"]
+        S3_Landing[(S3 Landing Zone - Raw)]
+        S3_Processed[(S3 Cleansed - Parquet/Avro)]
+        subgraph Specialized_Stores
+            HealthLake[Amazon HealthLake - FHIR Store]
+            OmicsStore[Amazon Omics - Sequence/Variant Store]
+        end
+    end
+
+    subgraph Analytics_AI ["Intelligence & Insights"]
+        SageMaker[Amazon SageMaker - Clinical ML]
+        Comprehend[Amazon Comprehend Medical - NLP]
+        Redshift[Amazon Redshift - Population Health]
+        Athena[Amazon Athena - SQL Queries]
+    end
+
+    subgraph Consumption_Layer ["Action & Visualization"]
+        QuickSight[Amazon QuickSight - Dashboards]
+        Connect[Amazon Connect - Provider Alerts]
+        API[Amazon API Gateway - FHIR APIs]
+    end
+
+    %% Connectivity
+    IoT & Apps --> KDS
+    EMR --> MKS
+    Sequencer --> Transfer
+    Transfer --> S3_Landing
+    
+    KDS --> Flink
+    Flink --> HealthLake
+    Flink --> Lambda
+    
+    S3_Landing --> HealthOmics
+    HealthOmics --> OmicsStore
+    
+    HealthLake --> SageMaker
+    OmicsStore --> SageMaker
+    S3_Processed --> Redshift
+    
+    SageMaker --> Connect
+    SageMaker --> Lambda
+    HealthLake --> API
+    Redshift --> QuickSight
+
+    %% Styling
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef storage fill:#3F8624,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef process fill:#0073BB,stroke:#232F3E,stroke-width:2px,color:white;
+    
+    class KDS,Firehose,MKS,Transfer,Flink,Lambda,HealthOmics,Batch process;
+    class S3_Landing,S3_Processed,HealthLake,OmicsStore,Redshift storage;
+    class SageMaker,Comprehend,QuickSight,Connect,API aws;
